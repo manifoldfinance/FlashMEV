@@ -39,7 +39,7 @@ export MAINNET_RPC_URL=...
 ```bash
 ./script/test.sh
 ```
-[Output](reports/backrun-test-results.md)
+[Output](docs/backrun-test-results.md)
 
 ### Deploy
 ```bash

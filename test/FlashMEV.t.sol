@@ -4,8 +4,11 @@ pragma solidity ^0.8.17;
 import "forge-std/Test.sol";
 import "../src/FlashMEV.sol";
 import {IUniswapV2Router02} from "../src/interfaces/IUniswapV2Router02.sol";
+import {SafeTransferLib} from "solmate/utils/SafeTransferLib.sol";
+import {IWETH} from "../src/interfaces/IWETH.sol";
 
 contract FlashMEVTest is Test {
+    using SafeTransferLib for ERC20;
     FlashMEV public flashMev;
     uint256 internal mainnetFork;
     string internal MAINNET_RPC_URL = vm.envString("MAINNET_RPC_URL");
@@ -24,6 +27,7 @@ contract FlashMEVTest is Test {
         vm.selectFork(mainnetFork);
         flashMev = new FlashMEV(2, mevETH, UNI_ROUTER);
     }
+ 
 
     /// @dev run arb for known opportunity
     function testFlashArb() public {
@@ -118,4 +122,41 @@ contract FlashMEVTest is Test {
         vm.expectRevert(abi.encodeWithSignature("Unauthorized()"));
         flashMev.destroy(payable(address(this)));
     }
+
+    function testUpdateGov() external {
+        flashMev.updateGov(0xfc90FAc785B6cd79A83351Ef80922Bb484431E8d);
+        vm.expectRevert(abi.encodeWithSignature("Unauthorized()"));
+        flashMev.destroy(payable(address(this)));
+    }
+
+    function testUpdateFee() external {
+        flashMev.updateFee(1);
+        
+    }
+
+    function testUpdateOracle() external {
+        flashMev.updateOracle(SUSHI_ROUTER);
+        
+    }
+
+    function testUpdateFriend() external {
+        flashMev.updateFriend(true, address(0));
+    }
+
+    function testSweep() external {
+        address[] memory tokens = new address[](1);
+        tokens[0] = WETH;
+        IWETH(WETH).deposit{value: 1000000000000000000}();
+        ERC20(WETH).safeTransfer(address(flashMev), 1000000000000000000);
+        SafeTransferLib.safeTransferETH(address(flashMev), 1000000000000000000);
+        assertEq(ERC20(WETH).balanceOf(address(flashMev)), 1000000000000000000);
+        flashMev.sweep(tokens, address(this));
+        assertEq(ERC20(WETH).balanceOf(address(flashMev)), 0);
+    }
+
+    /// @notice Function to receive Ether. msg.data must be empty
+    receive() external payable {}
+
+    /// @notice Fallback function is called when msg.data is not empty
+    fallback() external payable {}
 }

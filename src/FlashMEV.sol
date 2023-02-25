@@ -42,12 +42,13 @@ contract FlashMEV is IFlashLoanRecipient, IFlashBorrower, IFlashLoanReceiver {
         0x057835Ad21a177dbdd3090bB1CAE03EaCF78Fc6d; // aave data provider
     address internal constant VAULT =
         0xBA12222222228d8Ba445958a75a0704d566BF2C8; // balancer vault
+    mapping(address => bool) internal FLASH_FRIEND; // flashloan execute user access
 
     // address internal constant SPLIT_SWAP =
     //     0x77337dEEA78720542f0A1325394Def165918D562;  // Manifold split swap router
 
-    /// @dev setup contract with governece fee and mevETH address
-    /// @param _govFee governence fee on mev profit as 1/100 th of a decimal i.e. 1 == 0.01%
+    /// @dev setup contract with governance fee and mevETH address
+    /// @param _govFee governance fee on mev profit as 1/100 th of a decimal i.e. 1 == 0.01%
     /// @param _mevETH mevETH address
     /// @param _oracleRouter uni V2 style router for eth value lookup
     constructor(uint8 _govFee, address _mevETH, address _oracleRouter) {
@@ -55,11 +56,12 @@ contract FlashMEV is IFlashLoanRecipient, IFlashBorrower, IFlashLoanReceiver {
         mevETH = _mevETH;
         GOV_FEE = _govFee;
         ORACLE_ROUTER = _oracleRouter;
+        FLASH_FRIEND[GOV] = true;
     }
 
     /// @notice Admin can change ownership
     /// @param newGov Address of new owner
-    function changeGov(address newGov) external {
+    function updateGov(address newGov) external {
         if (msg.sender != GOV) revert Unauthorized();
         if (newGov == address(0)) revert ZeroAddress();
         GOV = newGov;
@@ -67,16 +69,24 @@ contract FlashMEV is IFlashLoanRecipient, IFlashBorrower, IFlashLoanReceiver {
 
     /// @notice Admin can change fee
     /// @param _newFee New fee (1 == 0.01%)
-    function changeFee(uint8 _newFee) external {
+    function updateFee(uint8 _newFee) external {
         if (msg.sender != GOV) revert Unauthorized();
         GOV_FEE = _newFee;
     }
 
     /// @notice Admin can change oracle router
     /// @param _oracleRouter uni V2 style router
-    function changeOracle(address _oracleRouter) external {
+    function updateOracle(address _oracleRouter) external {
         if (msg.sender != GOV) revert Unauthorized();
         ORACLE_ROUTER = _oracleRouter;
+    }
+
+    /// @notice Update internal Flash friend list
+    /// @param flashAllowed Boolean flagging if user is allowed to execute
+    /// @param friend Address of friend
+    function updateFriend(bool flashAllowed, address friend) external {
+        if (msg.sender != GOV) revert Unauthorized();
+        FLASH_FRIEND[friend] = flashAllowed;
     }
 
     /// @notice Main Flash loan call to execute MEV
@@ -88,6 +98,7 @@ contract FlashMEV is IFlashLoanRecipient, IFlashBorrower, IFlashLoanReceiver {
         uint256 amount,
         bytes calldata transactions
     ) external {
+        if (!FLASH_FRIEND[msg.sender]) revert Unauthorized();
         address me = address(this);
         address sender = msg.sender;
         uint256 startGas = gasleft();
