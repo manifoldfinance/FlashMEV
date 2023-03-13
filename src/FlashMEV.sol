@@ -90,10 +90,12 @@ contract FlashMEV is IFlashLoanRecipient, IFlashBorrower, IFlashLoanReceiver {
     }
 
     /// @notice Main Flash loan call to execute MEV
+    /// @param useBalancer true if its okay to use balancer flashloan (reentrancy protection makes it impossible to use balancer flashloan with balancer swaps)
     /// @param token token to loan
     /// @param amount Amount to loan of token
     /// @param transactions packed list of transaction data (value(256),contract(160),data_len(16),data(data_len*8))
     function flash(
+        bool useBalancer,
         address token,
         uint256 amount,
         bytes calldata transactions
@@ -108,7 +110,7 @@ contract FlashMEV is IFlashLoanRecipient, IFlashBorrower, IFlashLoanReceiver {
         // 1) balancer
         // 2) bentobox
         // 3) aave
-        if (ERC20(token).balanceOf(VAULT) >= amount) {
+        if (useBalancer && ERC20(token).balanceOf(VAULT) >= amount) {
             // addresses of the reserves to flashloan
             address[] memory assets = new address[](1);
             assets[0] = token;

@@ -45,3 +45,7 @@ export MAINNET_RPC_URL=...
 ```bash
 ./script/deploy.sh
 ```
+
+### Engineering log
+
+[Log of goals, development, challenges etc](doc/engineer-log.md)

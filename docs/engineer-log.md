@@ -18,3 +18,13 @@ Initial design is to encapsulate pre-constructed transactions in a flash-loan. T
 ## 2023/02/25
 
 - Added access list to contract flash function for safety (contract exploit potential)
+
+## 2023/03/09
+
+- Added bool to flash function to indicate whether it can use Balancer flashloan. Reason for this addition is that through testing it was discovered, Balancer cannot make swaps with its own flashloan. This is due to reentrancy protection similar to Uni V2 flashloans.
+
+## 2023/03/10
+
+- Testing engine on rETH, wstEth and stEth yields some interesting results.
+- stEth is rebased, so ratio Eth -> stEth is not 1:1
+- rEth deposit limit seems full i.e. no more deposits can be made

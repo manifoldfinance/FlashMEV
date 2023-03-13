@@ -108,7 +108,7 @@ contract FlashMEVTest is Test {
         );
         emit log_bytes(transactions);
         uint256 balBefore = ERC20(DAI).balanceOf(address(this));
-        flashMev.flash(DAI, amountIn, transactions);
+        flashMev.flash(true, DAI, amountIn, transactions);
         assertGt(ERC20(DAI).balanceOf(address(this)), balBefore);
         assertGt(ERC20(DAI).balanceOf(address(flashMev)), 0);
     }
