@@ -89,6 +89,14 @@ contract FlashMEV is IFlashLoanRecipient, IFlashBorrower, IFlashLoanReceiver {
         FLASH_FRIEND[friend] = flashAllowed;
     }
 
+    /// @notice Admin can change mevETH address
+    /// @param newMevEth Address of new mevETH
+    function updateMevETH(address newMevEth) external {
+        if (msg.sender != GOV) revert Unauthorized();
+        if (newMevEth == address(0)) revert ZeroAddress();
+        mevETH = newMevEth;
+    }
+
     /// @notice Main Flash loan call to execute MEV
     /// @param useBalancer true if its okay to use balancer flashloan (reentrancy protection makes it impossible to use balancer flashloan with balancer swaps)
     /// @param token token to loan

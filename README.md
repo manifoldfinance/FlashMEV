@@ -9,6 +9,10 @@ Loans are made in a preferential order, based on lowest fees first then token av
 - BentoBox (0.05% fee)
 - Aave (0.09% fee)
 
+## Deployed at
+
+- Mainnet [0x8e0701f181E87CFCe3466b7A71f853C0029f2855](https://etherscan.io/address/0x8e0701f181e87cfce3466b7a71f853c0029f2855)
+
 ## Usage
 
 Example usage:
