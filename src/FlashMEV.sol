@@ -52,7 +52,7 @@ contract FlashMEV is IFlashLoanRecipient, IFlashBorrower, IFlashLoanReceiver {
     /// @param _mevETH mevETH address
     /// @param _oracleRouter uni V2 style router for eth value lookup
     constructor(uint8 _govFee, address _mevETH, address _oracleRouter) {
-        GOV = msg.sender;
+        GOV = tx.origin; // tx.origin used over msg.sender for create2 deployment
         mevETH = _mevETH;
         GOV_FEE = _govFee;
         ORACLE_ROUTER = _oracleRouter;
@@ -95,6 +95,17 @@ contract FlashMEV is IFlashLoanRecipient, IFlashBorrower, IFlashLoanReceiver {
         if (msg.sender != GOV) revert Unauthorized();
         if (newMevEth == address(0)) revert ZeroAddress();
         mevETH = newMevEth;
+    }
+
+    /// @notice returns flash freind mapping for given address
+    /// @param friend user address to query
+    function isFriend(address friend) external view returns (bool) {
+        return FLASH_FRIEND[friend];
+    }
+
+    /// @notice returns governance address
+    function gov() external view returns (address) {
+        return GOV;
     }
 
     /// @notice Main Flash loan call to execute MEV
