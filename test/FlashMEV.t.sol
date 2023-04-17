@@ -10,6 +10,7 @@ import {IWETH} from "../src/interfaces/IWETH.sol";
 contract FlashMEVTest is Test {
     using SafeTransferLib for ERC20;
     FlashMEV public flashMev;
+    address internal gov;
     uint256 internal mainnetFork;
     string internal MAINNET_RPC_URL = vm.envString("MAINNET_RPC_URL");
     address internal constant WETH = 0xC02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2;
@@ -25,13 +26,17 @@ contract FlashMEVTest is Test {
     function setUp() public {
         mainnetFork = vm.createFork(MAINNET_RPC_URL, 14476842);
         vm.selectFork(mainnetFork);
-        flashMev = new FlashMEV(2, mevETH, UNI_ROUTER);
+        flashMev = new FlashMEV{salt: "Manifold"}(2, mevETH, UNI_ROUTER);
+        gov = tx.origin;
+        vm.prank(gov);
+        flashMev.updateGov(address(this));
+        flashMev.updateFriend(true, address(this));
     }
  
 
     /// @dev run arb for known opportunity
     function testFlashArb() public {
-        vm.selectFork(mainnetFork);
+        // vm.selectFork(mainnetFork);
         uint256 amountIn = 73000000000000000000;
         address[] memory path = new address[](2);
         path[0] = WETH;
