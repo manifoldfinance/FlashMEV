@@ -11,7 +11,7 @@ Loans are made in a preferential order, based on lowest fees first then token av
 
 ## Deployed at
 
-- Mainnet [0x8e0701f181E87CFCe3466b7A71f853C0029f2855](https://etherscan.io/address/0x8e0701f181e87cfce3466b7a71f853c0029f2855)
+- Mainnet [0x60CFf949c22b7136dc750Af1F1a8e0a2D2A7556F](https://etherscan.io/address/0x60CFf949c22b7136dc750Af1F1a8e0a2D2A7556F)
 
 ## Usage
 
